@@ -1,1 +1,85 @@
+#include "rtos_api.h"
 
+extern TCB task_table[];
+extern int task_count;
+extern int current_task;
+extern int activation_counter;
+extern int os_running;
+
+int find_next_task(void) {
+	int best = -1;
+	
+	for (int i = 0; i < task_count; i++) {
+		
+		if (task_table[i].state == READY) {
+			continue;
+		}
+
+		if (best == -1) {
+			best = i;
+			continue;
+		}
+
+		if (task_table[i].priority > task_table[best].priority) {
+			best = i;
+			continue;
+		}
+
+		if (task_table[i].priority == task_table[best].priority &&
+			task_table[i].activation_order < task_table[best].activation_order) {
+			best = i;
+		}
+	}
+
+	return best;
+}
+
+void dispatch(void) {
+	int next = find_next_task();
+
+	if (next == -1) {
+		ShutdownOS();
+		return;
+	}
+
+	if (current_task != 1) {
+		if (setjmp(task_table[current_task].context) != 0) {
+			// will back here soon
+			return
+		}
+	}
+
+	current_task = next;
+	task_table[current_task].state = RUNNING;
+
+	if (task_table[current_task].started == 0) {
+		task_table[current_task].started = 1;
+		task_table[current_task].func();
+	}
+	else {
+		longjmp(task_table[current_task].context, 1);
+	}
+}
+
+void ActivateTask(TTask task) {
+	if (task_table[task].state != SUSPENDED) {
+		return;
+	}
+
+	task_table[task].state = READY;
+
+	task_table[task].activation_order = activation_counter++;
+
+	dispatch();
+}
+
+void TerminateTask(void) {
+	task_table[current_task].state = SUSPENDED;
+	task_table[current_task].started = 0;
+
+	task_table[current_task].activation_order = -1;
+
+	current_task = -1;
+
+	dispatch();
+}
