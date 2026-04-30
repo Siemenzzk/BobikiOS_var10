@@ -44,20 +44,18 @@ void ShutdownOS(void);
 // внутренний диспетчер
 void dispatch(void);
 
-// макросы
-#define DeclareTask(TaskID) \
-    extern TCB TaskID##_tcb; \
-    TTask TaskID;
+// регистрация задачи
+TTask register_task(void (*func)(), int priority);
 
-#define TASK(TaskID, priority)           \
-    void TaskID##_func();                \
-    TCB TaskID##_tcb = {                 \
-        .priority = priority,            \
-        .state    = SUSPENDED,           \
-        .func     = TaskID##_func,       \
-        .started  = 0,                   \
-        .activation_order = -1           \
-    };                                   \
-    void TaskID##_func()
+// макросы
+#define DeclareTask(TaskID)         \
+    extern int TaskID##_priority;   \
+    extern void TaskID##_func(void);\
+    TTask TaskID
+
+#define TASK(TaskID, prio)          \
+    void TaskID##_func(void);       \
+    int TaskID##_priority = prio;   \
+    void TaskID##_func(void)
 
 #endif // RTOS_API_H

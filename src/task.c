@@ -11,7 +11,7 @@ int find_next_task(void) {
 	
 	for (int i = 0; i < task_count; i++) {
 		
-		if (task_table[i].state == READY) {
+		if (task_table[i].state != READY) {
 			continue;
 		}
 
@@ -42,10 +42,10 @@ void dispatch(void) {
 		return;
 	}
 
-	if (current_task != 1) {
+	if (current_task != -1) {
 		if (setjmp(task_table[current_task].context) != 0) {
 			// will back here soon
-			return
+			return;
 		}
 	}
 
@@ -82,4 +82,16 @@ void TerminateTask(void) {
 	current_task = -1;
 
 	dispatch();
+}
+
+TTask register_task(void (*func)(), int priority) {
+	int id = task_count;
+	task_table[id].id = id;
+	task_table[id].priority = priority;
+	task_table[id].state = SUSPENDED;
+	task_table[id].func = func;
+	task_table[id].started = 0;
+	task_table[id].activation_order = -1;
+	task_count++;
+	return id;
 }
