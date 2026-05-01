@@ -35,6 +35,11 @@ int find_next_task(void) {
 }
 
 void dispatch(void) {
+
+	if (current_task != -1 && task_table[current_task].state == RUNNING) {
+		task_table[current_task].state = READY;
+	}
+
 	int next = find_next_task();
 
 	if (next == -1) {
@@ -67,10 +72,6 @@ void ActivateTask(TTask task) {
 
 	task_table[task].state = READY;
 	task_table[task].activation_order = activation_counter++;
-
-	if (current_task != -1) {
-		task_table[current_task].state = READY;
-	}
 
 	dispatch();
 }

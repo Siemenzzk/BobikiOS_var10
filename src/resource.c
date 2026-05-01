@@ -38,7 +38,17 @@ void ReleaseResource(TResource res) {
     resource_table[res].is_locked = 0;
     resource_table[res].owner = -1;
 
-    task_table[current_task].priority = task_table[current_task].base_priority;
+    int new_priority = task_table[current_task].base_priority;
+    for (int i = 0; i < resource_count; i++) {
+        if (resource_table[i].is_locked &&
+            resource_table[i].owner == current_task) {
+            if (resource_table[i].ceiling > new_priority) {
+                new_priority = resource_table[i].ceiling;
+            }
+        }
+    }
+
+    task_table[current_task].priority = new_priority;
 
     dispatch();
 }
