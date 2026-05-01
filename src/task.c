@@ -90,10 +90,15 @@ TTask register_task(void (*func)(), int priority) {
 	int id = task_count;
 	task_table[id].id = id;
 	task_table[id].priority = priority;
+	task_table[id].base_priority = priority;
 	task_table[id].state = SUSPENDED;
 	task_table[id].func = func;
 	task_table[id].started = 0;
 	task_table[id].activation_order = -1;
 	task_count++;
 	return id;
+}
+
+int get_current_priority(void) {
+	return task_table[current_task].priority;
 }
