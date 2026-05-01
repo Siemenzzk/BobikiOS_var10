@@ -4,10 +4,18 @@ CFLAGS = -Wall -Wextra -std=c99 -Isrc
 SRC = src/global.c src/os.c src/resource.c src/task.c
 TEST = tests/test_main.c
 
-all: rtos
+ifeq ($(OS), Windows_NT)
+    TARGET = rtos.exe
+    RM = del
+else
+    TARGET = rtos.out
+    RM = rm -f
+endif
 
-rtos: $(SRC) $(TEST)
-	$(CC) $(CFLAGS) $(SRC) $(TEST) -o rtos.exe
+all: $(TARGET)
+
+$(TARGET): $(SRC) $(TEST)
+	$(CC) $(CFLAGS) $(SRC) $(TEST) -o $(TARGET)
 
 clean:
-	del rtos.exe
+	$(RM) $(TARGET)
