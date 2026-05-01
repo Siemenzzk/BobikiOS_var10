@@ -7,25 +7,23 @@
 #define MAX_RESOURCES 16
 #define MAX_EVENTS 16
 
-// состояния задачи
+extern jmp_buf os_context;
+
 typedef enum {
     SUSPENDED,
     READY,
     RUNNING
 } TTaskState;
 
-// идентификатор задачи — индекс в таблице задач
 typedef int TTask;
-
-// идентификатор ресурса — индекс в таблице ресурсов
 typedef int TResource;
-
-// маска событий — каждый бит соответствует одному событию
 typedef unsigned int TEventMask;
 
+// TASKS
 typedef struct {
     int        id;
     int        priority;
+    int        base_priority;
     TTaskState state;
     jmp_buf    context;
     void       (*func)();
@@ -33,21 +31,17 @@ typedef struct {
     int        activation_order;
 } TCB;
 
-// управление задачами
 void ActivateTask(TTask task);
 void TerminateTask(void);
 
-// управление ОС
 void StartOS(TTask task);
 void ShutdownOS(void);
 
-// внутренний диспетчер
 void dispatch(void);
 
-// регистрация задачи
 TTask register_task(void (*func)(), int priority);
+int get_current_priority(void);
 
-// макросы
 #define DeclareTask(TaskID)         \
     extern int TaskID##_priority;   \
     extern void TaskID##_func(void);\
@@ -57,5 +51,21 @@ TTask register_task(void (*func)(), int priority);
     void TaskID##_func(void);       \
     int TaskID##_priority = prio;   \
     void TaskID##_func(void)
+
+// RESOURCES
+typedef struct {
+    int id;
+    int ceiling;
+    int is_locked;
+    int owner;
+} RCB;
+
+TResource register_resource(int ceiling);
+
+void GetResource(TResource res);
+void ReleaseResource(TResource res);
+
+#define DeclareResource(ResourceID) \
+    TResource ResourceID
 
 #endif // RTOS_API_H

@@ -35,6 +35,11 @@ int find_next_task(void) {
 }
 
 void dispatch(void) {
+
+	if (current_task != -1 && task_table[current_task].state == RUNNING) {
+		task_table[current_task].state = READY;
+	}
+
 	int next = find_next_task();
 
 	if (next == -1) {
@@ -68,10 +73,6 @@ void ActivateTask(TTask task) {
 	task_table[task].state = READY;
 	task_table[task].activation_order = activation_counter++;
 
-	if (current_task != -1) {
-		task_table[current_task].state = READY;
-	}
-
 	dispatch();
 }
 
@@ -90,10 +91,15 @@ TTask register_task(void (*func)(), int priority) {
 	int id = task_count;
 	task_table[id].id = id;
 	task_table[id].priority = priority;
+	task_table[id].base_priority = priority;
 	task_table[id].state = SUSPENDED;
 	task_table[id].func = func;
 	task_table[id].started = 0;
 	task_table[id].activation_order = -1;
 	task_count++;
 	return id;
+}
+
+int get_current_priority(void) {
+	return task_table[current_task].priority;
 }
