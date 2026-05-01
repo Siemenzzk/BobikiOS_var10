@@ -7,8 +7,6 @@
 #define MAX_RESOURCES 16
 #define MAX_EVENTS 16
 
-extern jmp_buf os_context;
-
 typedef enum {
     SUSPENDED,
     READY,
@@ -18,6 +16,9 @@ typedef enum {
 typedef int TTask;
 typedef int TResource;
 typedef unsigned int TEventMask;
+
+extern jmp_buf os_context;
+extern TEventMask sys_event_mask;
 
 // TASKS
 typedef struct {
@@ -29,6 +30,7 @@ typedef struct {
     void       (*func)();
     int        started;
     int        activation_order;
+    TEventMask waiting_mask;
 } TCB;
 
 void ActivateTask(TTask task);
@@ -67,5 +69,11 @@ void ReleaseResource(TResource res);
 
 #define DeclareResource(ResourceID) \
     TResource ResourceID
+
+// EVENTS
+void DeclareSysEvent(TEventMask mask);
+void SetSysEvent(TEventMask mask);
+void GetSysEvent(TEventMask* event);
+void WaitSysEvent(TEventMask mask);
 
 #endif // RTOS_API_H
