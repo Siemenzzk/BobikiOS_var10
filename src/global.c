@@ -11,3 +11,5 @@ jmp_buf os_context;
 
 RCB resource_table[MAX_RESOURCES];
 int resource_count = 0;
+
+TEventMask sys_event_mask = 0;

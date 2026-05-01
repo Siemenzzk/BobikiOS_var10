@@ -96,6 +96,7 @@ TTask register_task(void (*func)(), int priority) {
 	task_table[id].func = func;
 	task_table[id].started = 0;
 	task_table[id].activation_order = -1;
+	task_table[id].waiting_mask = 0;
 	task_count++;
 	return id;
 }
