@@ -30,6 +30,7 @@
 
 # Executables
 *.exe
+*.o
 *.out
 *.app
 *.i*86
@@ -53,3 +54,14 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Visual Studio
+.vs/
+*.db
+*.db-shm
+*.db-wal
+*.opendb
+*.sqlite
+DocumentLayout.json
+ProjectSettings.json
+VSWorkspaceState.json
